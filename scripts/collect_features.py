@@ -6,25 +6,25 @@ main_characters.csv 의 각 캐릭터에 대해 SNAPSHOT_MONTHS 개월치 월별
 
 v2.1 추가 (EDA 후속, 라이브 검증 완료):
   - access_flag (최근 7일 접속): 월별 → access_active_months / access_ratio / access_recent
-      → 방치 캐릭 vs 파킹(활동 중) 구분 신호. character/basic 에 이미 포함 (추가 호출 0)
+      → 방치 캐릭 vs 주차 후보(활동 중) 구분 신호. character/basic 에 이미 포함 (추가 호출 0)
   - character_date_create: 캐릭터 생성일 (character/basic 에 포함, 추가 호출 0)
   - character/hexamatrix → hexa_level_sum + avg_monthly_delta_hexa
-      → 260+ 클린 단조 활동 신호 (HEXA 코어 레벨 합)
+      → 270+ 클린 단조 활동 신호 (HEXA 코어 레벨 합)
 v2.2 추가 (age 교란 제거 — 신규 클래스 렌 포함 유지하며 편향 완화):
   - recent{3,6}_delta_*: 최근 3·6개월 기울기. 12개월 delta는 6월 생성 신규캐(렌 등)를
       항상 '활성'으로 강제 분류 → 캐릭터 연령(age) 교란. 최근-구간 기울기는 연령과 무관하게
-      '현재 파킹'을 정의 → H1 클러스터링 / H2 class_group 분포 편향 동시 제거. (추가 호출 0)
+      '현재 주차 후보'을 정의 → H1 클러스터링 / H2 class_group 분포 편향 동시 제거. (추가 호출 0)
   - character_age_months / created_in_window: 편향 진단·민감도 분석용. cutoff(2025-06-30)는
       유지(렌=현 직업분포 1위, 대표성). created_in_window 제외 재실행 = 강건성 체크.
 
 스냅샷 기간 선택 근거 (12개월):
-  - 파킹은 "현재 진행 중인 행동" 으로 탐지 대상 — 최근 1년 신호가 더 적합
-  - 24개월: 1년 전 파킹 후 복귀 유저까지 파킹으로 분류될 위험 (디렉터 타겟팅 정책 위배)
-  - 6개월: 활성-슬로우 유저(282~285 자연스러운 성장 둔화)와 파킹 분리 어려움
-  - 12개월: 1년 무성장 = 명백한 파킹 신호 + 일시 정지(1~2개월) 노이즈 흡수
+  - 주차 후보은 "현재 진행 중인 행동" 으로 탐지 대상 — 최근 1년 신호가 더 적합
+  - 24개월: 1년 전 주차 후보 후 복귀 유저까지 주차 후보으로 분류될 위험 (디렉터 타겟팅 정책 위배)
+  - 6개월: 활성-슬로우 유저(286~290 자연스러운 성장 둔화)와 주차 후보 분리 어려움
+  - 12개월: 1년 무성장 = 명백한 주차 후보 신호 + 일시 정지(1~2개월) 노이즈 흡수
   - Nexon API 2년 한계에서 1년 마진 확보 → 경계 케이스 회피
 
-API 호출: ~2,000명 × SNAPSHOT_MONTHS × 11회 → 400 req/s 기준 소요
+API 호출: ~2,000명 × SNAPSHOT_MONTHS × 14회 → 400 req/s 기준 소요
   - 12개월: ~264,000회 → ~660초 (~11분)
 """
 
@@ -55,6 +55,8 @@ _session.headers.update({"x-nxopen-api-key": API_KEY})
 _DATA_DIR   = Path(__file__).resolve().parent.parent / "data"
 INPUT_FILE  = str(_DATA_DIR / "main_characters.csv")
 OUTPUT_FILE = str(_DATA_DIR / "features_monthly.csv")
+RAW_FILE    = str(_DATA_DIR / "monthly_snapshots_raw.csv")
+EXP_REQUIREMENT_FILE = str(_DATA_DIR / "exp_requirement_table.csv")
 CONCURRENCY = 30
 MAX_RPS     = 400
 
@@ -74,7 +76,7 @@ for _ in range(SNAPSHOT_MONTHS):
         _y -= 1
 MONTHS.reverse()   # 오래된 → 최신
 
-# 최근-구간 기울기 창: age(캐릭터 연령) 교란 제거용 '현재 파킹' 신호 (추가 API 호출 0)
+# 최근-구간 기울기 창: age(캐릭터 연령) 교란 제거용 '현재 주차 후보' 신호 (추가 API 호출 0)
 RECENT_WINDOWS = [3, 6]   # 최근 3·6개월 두 창 모두 산출 → EDA에서 Feature Set 선택
 
 # delta 필드명 → 컬럼 접미사 (12mo avg_monthly_delta_* 명명과 일치)
@@ -82,9 +84,9 @@ _DELTA_SUFFIX = {
     "level":                  "level",
     "combat_power":           "combat_power",
     "union_level":            "union_level",
-    "arcane_symbol_score":    "arcane_symbol",
     "authentic_symbol_score": "authentic_symbol",
     "hexa_level_sum":         "hexa",
+    "cumexp":                 "cumexp",
 }
 _RECENT_DELTA_KEYS = [
     f"recent{w}_delta_{suf}" for w in RECENT_WINDOWS for suf in _DELTA_SUFFIX.values()
@@ -122,19 +124,17 @@ def api_get(endpoint, params):
     return None  # 400(날짜 범위 초과), 404, 네트워크 오류 모두 None
 
 
-def get_symbol_scores(symbol_data):
-    """아케인심볼/어센틱심볼 레벨 합산을 각각 반환."""
-    arcane, authentic = 0, 0
+def get_authentic_symbol_score(symbol_data):
+    """어센틱심볼 레벨 합산을 반환."""
+    authentic = 0
     if not symbol_data:
-        return arcane, authentic
+        return authentic
     for s in symbol_data.get("symbol", []):
         name = s.get("symbol_name", "")
         lv   = int(s.get("symbol_level") or 0)
-        if "아케인심볼" in name:
-            arcane += lv
-        elif "어센틱심볼" in name:
+        if "어센틱심볼" in name:
             authentic += lv
-    return arcane, authentic
+    return authentic
 
 
 def get_hexa_level_sum(hexa_data):
@@ -147,10 +147,11 @@ def get_hexa_level_sum(hexa_data):
 
 def fetch_month_snapshot(ocid, year_month):
     """
-    캐릭터 1명의 특정 월 스냅샷 수집 (11회 API 호출: basic1 + stat7 + union1 + symbol1 + hexa1).
+    캐릭터 1명의 특정 월 스냅샷 수집 (14회 API 호출: basic4 + stat7 + union1 + symbol1 + hexa1).
     basic이 None이면 전체 None 반환 (캐릭터 미존재 or API 범위 초과).
-    반환: dict(level, exp, combat_power, union_level,
-               arcane_symbol_score, authentic_symbol_score)
+    반환: dict(level, exp, exp_rate, combat_power, union_level,
+               authentic_symbol_score)
+    exp_rate: 현재 레벨 내 경험치 비율 (float, %) — character/basic 에 포함, 추가 호출 0
     """
     date_01 = f"{year_month}-01"
 
@@ -162,9 +163,26 @@ def fetch_month_snapshot(ocid, year_month):
     exp_raw = basic.get("character_exp")
     exp = int(exp_raw) if exp_raw is not None else None
 
+    exp_rate_raw = basic.get("character_exp_rate")
+    try:
+        exp_rate = float(exp_rate_raw) if exp_rate_raw is not None else None
+    except (ValueError, TypeError):
+        exp_rate = None
+
     date_create = basic.get("character_date_create")          # ISO, 캐릭터 메타(월 무관 상수)
-    access_raw = basic.get("access_flag")                     # "true"/"false" = 최근 7일 접속
-    access = 1 if access_raw == "true" else (0 if access_raw == "false" else None)
+    access_flags = []
+    for day in [1, 8, 15, 22]:
+        weekly_basic = basic if day == 1 else api_get(
+            "character/basic", {"ocid": ocid, "date": f"{year_month}-{day:02d}"}
+        )
+        if weekly_basic:
+            access_raw = weekly_basic.get("access_flag")
+            access = 1 if access_raw == "true" else (0 if access_raw == "false" else None)
+            if access is not None:
+                access_flags.append(access)
+    access_active_weeks = sum(access_flags) if access_flags else None
+    access_observed_weeks = len(access_flags)
+    access = int(access_active_weeks > 0) if access_active_weeks is not None else None
 
     # stat × 7일 (MM-01 ~ MM-07) → max(combat_power)
     cp_values = []
@@ -185,7 +203,7 @@ def fetch_month_snapshot(ocid, year_month):
     union_level = union.get("union_level") if union else None
 
     symbol_data = api_get("character/symbol-equipment", {"ocid": ocid, "date": date_01})
-    arcane, authentic = get_symbol_scores(symbol_data)
+    authentic = get_authentic_symbol_score(symbol_data)
 
     hexa_data = api_get("character/hexamatrix", {"ocid": ocid, "date": date_01})
     hexa_level_sum = get_hexa_level_sum(hexa_data)
@@ -193,12 +211,14 @@ def fetch_month_snapshot(ocid, year_month):
     return {
         "level":                  level,
         "exp":                    exp,
+        "exp_rate":               exp_rate,
         "combat_power":           combat_power,
         "union_level":            union_level,
-        "arcane_symbol_score":    arcane,
         "authentic_symbol_score": authentic,
         "hexa_level_sum":         hexa_level_sum,
         "access_flag":            access,
+        "access_active_weeks":    access_active_weeks,
+        "access_observed_weeks":  access_observed_weeks,
         "date_create":            date_create,
     }
 
@@ -208,7 +228,7 @@ def avg_monthly_delta(indexed_values):
     [(month_idx, value), ...] 에서 월평균 변화량 계산.
     None 값 제외 후 유효값 2개 미만이면 None 반환.
     """
-    valid = [(i, v) for i, v in indexed_values if v is not None]
+    valid = [(i, v) for i, v in indexed_values if v is not None and not pd.isna(v)]
     if len(valid) < 2:
         return None
     first_idx, first_val = valid[0]
@@ -217,6 +237,28 @@ def avg_monthly_delta(indexed_values):
     if months_elapsed == 0:
         return None
     return (last_val - first_val) / months_elapsed
+
+
+def load_cumulative_exp_base():
+    req = pd.read_csv(EXP_REQUIREMENT_FILE, encoding="utf-8-sig")
+    req_map = req.set_index("level")["requirement"].to_dict()
+    base = {260: 0.0}
+    for level in range(261, 292):
+        base[level] = base[level - 1] + float(req_map[level - 1])
+    return base
+
+
+_CUMEXP_BASE = load_cumulative_exp_base()
+
+
+def cumulative_exp(level, exp):
+    if level is None or exp is None or pd.isna(level) or pd.isna(exp):
+        return None
+    return _CUMEXP_BASE.get(int(level), None) + float(exp) if int(level) in _CUMEXP_BASE else None
+
+
+def log1p_nonnegative(value):
+    return float(np.log1p(max(0, value))) if value is not None and not pd.isna(value) else None
 
 
 def character_age_months(date_create):
@@ -246,19 +288,29 @@ def compute_features(monthly_snaps):
 
     exp_val = last_snap.get("exp")
     log_exp = float(np.log1p(exp_val)) if exp_val is not None else None
+    for _, snap in valid:
+        snap["cumexp"] = cumulative_exp(snap.get("level"), snap.get("exp"))
 
     fields = [
         "level", "combat_power", "union_level",
-        "arcane_symbol_score", "authentic_symbol_score", "hexa_level_sum",
+        "authentic_symbol_score", "hexa_level_sum",
     ]
     indexed = {f: [(i, s.get(f)) for i, s in valid] for f in fields}
 
     # 접속 활동: 유효 월 중 access_flag 가 관측된 월 기준 집계
     access_vals = [s.get("access_flag") for _, s in valid if s.get("access_flag") is not None]
     access_active = sum(access_vals) if access_vals else None
-    access_ratio = round(sum(access_vals) / len(access_vals), 4) if access_vals else None
+    access_active_weeks = sum(
+        s.get("access_active_weeks") for _, s in valid
+        if s.get("access_active_weeks") is not None
+    )
+    access_observed_weeks = sum(s.get("access_observed_weeks", 0) for _, s in valid)
+    access_ratio = (
+        round(access_active_weeks / access_observed_weeks, 4)
+        if access_observed_weeks else None
+    )
 
-    # ── 최근-구간 기울기 (age 불변 '현재 파킹' 신호; 추가 API 호출 0) ──────────
+    # ── 최근-구간 기울기 (age 불변 '현재 주차 후보' 신호; 추가 API 호출 0) ──────────
     # 최근 w개월 = 월 인덱스 ≥ (전체 개월 수 - w). 유효값 <2 면 avg_monthly_delta 가 None 반환.
     n_months = len(MONTHS)
     recent = {
@@ -269,6 +321,11 @@ def compute_features(monthly_snaps):
     }
     recent_counts = {
         f"num_recent{w}_valid_months": sum(1 for i, _ in valid if i >= n_months - w)
+        for w in RECENT_WINDOWS
+    }
+    avg_cumexp = avg_monthly_delta(indexed["cumexp"])
+    recent_log_cumexp = {
+        f"log1p_recent{w}_delta_cumexp": log1p_nonnegative(recent[f"recent{w}_delta_cumexp"])
         for w in RECENT_WINDOWS
     }
 
@@ -284,7 +341,6 @@ def compute_features(monthly_snaps):
     return {
         "level":                              last_snap.get("level"),
         "union_level":                        last_snap.get("union_level"),
-        "arcane_symbol_score":                last_snap.get("arcane_symbol_score"),
         "authentic_symbol_score":             last_snap.get("authentic_symbol_score"),
         "hexa_level_sum":                     last_snap.get("hexa_level_sum"),
         "exp":                                exp_val,
@@ -292,11 +348,15 @@ def compute_features(monthly_snaps):
         "avg_monthly_delta_level":            avg_monthly_delta(indexed["level"]),
         "avg_monthly_delta_combat_power":     avg_monthly_delta(indexed["combat_power"]),
         "avg_monthly_delta_union_level":      avg_monthly_delta(indexed["union_level"]),
-        "avg_monthly_delta_arcane_symbol":    avg_monthly_delta(indexed["arcane_symbol_score"]),
         "avg_monthly_delta_authentic_symbol": avg_monthly_delta(indexed["authentic_symbol_score"]),
         "avg_monthly_delta_hexa":             avg_monthly_delta(indexed["hexa_level_sum"]),
+        "avg_monthly_delta_cumexp":           avg_cumexp,
+        "log1p_avg_monthly_delta_cumexp":     log1p_nonnegative(avg_cumexp),
         **recent,
+        **recent_log_cumexp,
         "access_active_months":               access_active,
+        "access_active_weeks":                access_active_weeks,
+        "access_observed_weeks":              access_observed_weeks,
         "access_ratio":                       access_ratio,
         "access_recent":                      last_snap.get("access_flag"),
         "character_date_create":              date_create,
@@ -310,13 +370,16 @@ def compute_features(monthly_snaps):
 
 
 _FEATURE_KEYS = [
-    "level", "union_level", "arcane_symbol_score", "authentic_symbol_score",
+    "level", "union_level", "authentic_symbol_score",
     "hexa_level_sum", "exp", "log_exp",
     "avg_monthly_delta_level", "avg_monthly_delta_combat_power",
-    "avg_monthly_delta_union_level", "avg_monthly_delta_arcane_symbol",
+    "avg_monthly_delta_union_level",
     "avg_monthly_delta_authentic_symbol", "avg_monthly_delta_hexa",
+    "avg_monthly_delta_cumexp", "log1p_avg_monthly_delta_cumexp",
     *_RECENT_DELTA_KEYS,
-    "access_active_months", "access_ratio", "access_recent",
+    *[f"log1p_recent{w}_delta_cumexp" for w in RECENT_WINDOWS],
+    "access_active_months", "access_active_weeks", "access_observed_weeks",
+    "access_ratio", "access_recent",
     "character_date_create", "character_age_months", "created_in_window",
     *_RECENT_COUNT_KEYS,
     "first_valid_month", "last_valid_month", "num_valid_months",
@@ -324,25 +387,46 @@ _FEATURE_KEYS = [
 
 
 def process_character(row):
-    """캐릭터 1명: SNAPSHOT_MONTHS 개월 스냅샷 수집 → 피처 계산 → dict 반환."""
+    """캐릭터 1명: SNAPSHOT_MONTHS 개월 스냅샷 수집 → 피처 계산 → dict 반환.
+    반환: {"features": {...}, "raw_rows": [{ocid, year_month, 월별 원시 스냅샷}, ...]}
+    """
     ocid = str(row["ocid"])
 
     monthly_snaps = []
+    raw_rows = []
     for i, ym in enumerate(MONTHS):
         snap = fetch_month_snapshot(ocid, ym)
         monthly_snaps.append((i, snap))
+        # 시간 분할 외부검증을 위해 0 경험치·미접속 월도 보존한다.
+        # 과거 버전은 exp_rate > 0인 월만 저장해 정체 구간 재구성이 불가능했다.
+        if snap is not None:
+            raw_rows.append({
+                "ocid":                       ocid,
+                "year_month":                 ym,
+                "level":                      snap.get("level"),
+                "exp":                        snap.get("exp"),
+                "exp_rate":                   snap.get("exp_rate"),
+                "combat_power":               snap.get("combat_power"),
+                "union_level":                snap.get("union_level"),
+                "authentic_symbol_score":     snap.get("authentic_symbol_score"),
+                "hexa_level_sum":             snap.get("hexa_level_sum"),
+                "access_flag":                snap.get("access_flag"),
+                "access_active_weeks":        snap.get("access_active_weeks"),
+                "access_observed_weeks":      snap.get("access_observed_weeks"),
+            })
 
     features = compute_features(monthly_snaps)
     if features is None:
         features = {k: None for k in _FEATURE_KEYS}
 
-    return {
+    feat_dict = {
         "character_name":  row["character_name"],
         "ocid":            ocid,
         "character_class": row.get("character_class", ""),
         "world_name":      row.get("world_name", ""),
         **features,
     }
+    return {"features": feat_dict, "raw_rows": raw_rows}
 
 
 def load_done_ocids(filepath):
@@ -358,26 +442,43 @@ def save_results(rows, filepath):
     new_df = pd.DataFrame(rows)
     if os.path.exists(filepath):
         existing = pd.read_csv(filepath, encoding="utf-8-sig")
+        existing = existing.reindex(columns=new_df.columns)
         new_df = pd.concat([existing, new_df], ignore_index=True)
-        new_df = new_df.drop_duplicates(subset="ocid", keep="first")
+        new_df = new_df.drop_duplicates(subset="ocid", keep="last")
     new_df.to_csv(filepath, index=False, encoding="utf-8-sig")
     print(f"  [저장] {filepath} — 누적 {len(new_df)}행")
 
 
-def collect():
+def save_raw_results(rows, filepath):
+    if not rows:
+        return
+    new_df = pd.DataFrame(rows)
+    if os.path.exists(filepath):
+        existing = pd.read_csv(filepath, encoding="utf-8-sig")
+        existing = existing.reindex(columns=new_df.columns)
+        new_df = pd.concat([existing, new_df], ignore_index=True)
+        # --refresh-raw 재수집 시 과거 최소 스키마 행을 확장 스키마 행으로 교체한다.
+        new_df = new_df.drop_duplicates(subset=["ocid", "year_month"], keep="last")
+    new_df.to_csv(filepath, index=False, encoding="utf-8-sig")
+    print(f"  [저장] {filepath} — 누적 {len(new_df)}행")
+
+
+def collect(refresh_raw=False):
     chars_df = pd.read_csv(INPUT_FILE, encoding="utf-8-sig")
     done_ocids = load_done_ocids(OUTPUT_FILE)
-    targets = chars_df[~chars_df["ocid"].astype(str).isin(done_ocids)]
+    targets = chars_df if refresh_raw else chars_df[~chars_df["ocid"].astype(str).isin(done_ocids)]
     total = len(targets)
 
-    calls_est = total * SNAPSHOT_MONTHS * 11
+    calls_est = total * SNAPSHOT_MONTHS * 14
     print(f"=== 월별 피처 수집 시작 ===")
     print(f"수집 월: {MONTHS[0]} ~ {MONTHS[-1]} ({len(MONTHS)}개월)")
-    print(f"대상: {total}명 (기수집 {len(done_ocids)}명 제외)")
+    mode = "월별 원시 이력 갱신" if refresh_raw else f"기수집 {len(done_ocids)}명 제외"
+    print(f"대상: {total}명 ({mode})")
     print(f"예상 API 호출: ~{calls_est:,}회 | 예상 소요: ~{calls_est / MAX_RPS:.0f}초\n")
 
     run_start = time.monotonic()
     results = []
+    raw_results = []
     done = 0
 
     with ThreadPoolExecutor(max_workers=CONCURRENCY) as executor:
@@ -389,7 +490,8 @@ def collect():
             result = future.result()
             done += 1
             if result is not None:
-                results.append(result)
+                results.append(result["features"])
+                raw_results.extend(result["raw_rows"])
 
             if done % 100 == 0 or done == total:
                 elapsed = time.monotonic() - run_start
@@ -398,10 +500,14 @@ def collect():
                 print(f"  [{done}/{total}] {elapsed:.0f}s 경과 | {rate:.1f}명/s "
                       f"| 유효 {valid_cnt}/{len(results)}명(미저장분)")
                 save_results(results, OUTPUT_FILE)
+                save_raw_results(raw_results, RAW_FILE)
                 results = []
+                raw_results = []
 
     if results:
         save_results(results, OUTPUT_FILE)
+    if raw_results:
+        save_raw_results(raw_results, RAW_FILE)
 
     elapsed = time.monotonic() - run_start
     print(f"\n=== 완료 | 소요: {elapsed:.1f}초 ===")
@@ -424,4 +530,12 @@ def collect():
 
 
 if __name__ == "__main__":
-    collect()
+    import argparse
+    parser = argparse.ArgumentParser(description="월별 성장 피처 수집")
+    parser.add_argument(
+        "--refresh-raw",
+        action="store_true",
+        help="기수집 OCID도 다시 조회해 monthly_snapshots_raw.csv의 월별 접속·유니온 이력을 보완",
+    )
+    args = parser.parse_args()
+    collect(refresh_raw=args.refresh_raw)

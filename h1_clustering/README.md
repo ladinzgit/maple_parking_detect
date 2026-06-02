@@ -1,114 +1,58 @@
-# 가설 1 — K-Means / DBSCAN 클러스터링
+# 가설 1: 성장 정체 기반 주차 후보 탐색
 
-**가설:** 주차 유저는 성장 정체 피처 기반으로 일반 유저와 구별되는 독립 군집을 형성한다.
+## 가설
 
-## 데이터
+성장 정체와 접속 행동이 함께 관측되는 주차 후보는 일반 성장 캐릭터와 구별되는 패턴을 보인다.
 
-- 소스: `data/features_monthly.csv` (12개월 월별 스냅샷 delta 피처)
-- 전처리: `eda/eda.ipynb` Sec 0–10 재현 (`h1_clustering.ipynb` 자체 완결)
-- 최종 샘플: **1,337명** (level 260–285 필터 → delta NaN 제거 후)
+공개 API에서는 주간 보스 수행 기록과 메소 생산량을 직접 조회할 수 없다. 따라서 H1은 주차 유저
+확정 실험이 아니라 **성장 정체 군집 탐색 후 반복 접속 후보를 선별하는 2단계 실험**이다.
 
-## 피처 세트
+## 사용 피처
 
-### Feature Set A (12mo avg) — primary
+금지 피처는 수집, 가공, 군집화, 검증에서 사용하지 않는다. H1의 성장 피처는 다음 세 개다.
 
-| 피처 | 전처리 | 설명 |
-|---|---|---|
-| `avg_monthly_delta_level` | 그대로 사용 | 월평균 레벨 변화량 (파킹 핵심 신호) |
-| `avg_monthly_delta_combat_power` | Winsorize P5–P95 | 월평균 전투력 변화량 (이상치 제거) |
-| `avg_monthly_delta_union_level` | clip(lower=0) | 월평균 유니온 레벨 변화량 (음수 → 0) |
-| `avg_monthly_delta_authentic_symbol` | 그대로 사용 | 월평균 어센틱 심볼 변화량 |
-| `avg_monthly_delta_arcane_symbol` | clip(lower=0) | 월평균 아케인 심볼 변화량 (음수 아티팩트 → 0) |
+- `log1p_avg_monthly_delta_cumexp`: 레벨 편향을 줄인 누적 경험치 성장량
+- `avg_monthly_delta_union_level`: 유니온 성장량
+- `avg_monthly_delta_hexa_frag`: HEXA 조각 소비 성장량
 
-### Feature Set A' (recent6) — age-debiased
+접속 행동은 `character/basic`의 최근 7일 접속 여부를 월 `1, 8, 15, 22일`에 조회해 보완한다.
+월내 한 번이라도 접속이 관측되면 `access_flag=1`로 집계한다.
 
-Feature Set A와 동일 구성이나 `recent6_delta_*` 컬럼 사용 (3mo/6mo 단기 기울기). 렌 코호트(2025-06 출시, 초기 delta 높음)로 인한 나이 편향 점검용.
+## 노트북
 
-> **제외 피처:**
-> - `arcane_stagnant` (이진): StandardScaler 이후 단일 boolean 축이 K-Means 지배 → 연속형 `avg_monthly_delta_arcane_symbol`로 대체. 단, `stagnation_score` 계산 및 사후 검증에는 유지.
-> - `normalized_delta_level`: 경험적 P75 정규화가 260–270 구간 파킹 유저 집중으로 편향 (Spearman r=−0.429, wiki vs 경험 불일치) → raw 값 사용.
-
-모든 피처에 `StandardScaler` 적용 후 클러스터링.
-
-## 방법
-
-1. **K-Means** (k=2~8, n_init=20, random_state=42)
-   - Elbow Curve + Silhouette Score 비교
-   - Silhouette 최대 k 자동 선택
-2. **DBSCAN** (min_samples=10, eps=자동 탐지)
-   - 5-NN k-distance plot → 정규화 대각선 거리 최대점으로 eps 결정
-   - K-Means 결과와 교차표 비교
-3. **PCA 2D** 시각화 (3-panel: 파킹 레이블 / stagnation_score / level_band)
-
-## v2 데이터 주요 수치 (2026-06-01 기준)
-
-| 항목 | 값 |
+| 파일 | 역할 |
 |---|---|
-| df_final (분석 기반) | 1,337명 |
-| Δlevel=0 비율 | 48.6% |
-| Triple-zero parked proxy | 18.7% (250명) |
-| stagnation_score=5 | 41명 (3.1%) |
-| created_in_window=1 (렌 코호트) | 326명 / 2,000명 (16.3%) |
+| `feature_selection.ipynb` | 피처 조합 탐색과 최종 피처셋 선정 |
+| `h1_clustering.ipynb` | 전체 기간 성장 정체 군집 탐색 |
+| `temporal_external_validation.ipynb` | 시간 분할 검증과 현재 후보 라벨 생성 |
 
-## 결과
+## 전체 기간 군집
 
-> ⚠️ **아래 결과는 v1 데이터 기준 (구 Feature Set A — arcane_stagnant 포함). v2 데이터 + 수정된 Feature Set A (arcane 연속형)로 재실행 필요.**
+- 분석 표본: 1,967명 (클러스터링 입력 1,965명)
+- K-Means: `k=4`
+- silhouette: `0.6430`
+- 성장 정체 군집: 394명 (`20.0%`)
 
-### K-Means (v1 — stale)
+이 군집은 주차 후보 확정 라벨이 아니다. 성장 정체 군집을 주차 후보로 바로 바꾸면 미접속 캐릭터가
+대량 포함된다.
 
-| k | Silhouette |
-|---|---|
-| 2 | 0.3738 |
-| 3 | 0.4429 |
-| 4 | 0.4429 |
-| **5** | **0.4517 ← best** |
-| 6 | 0.4143 |
-| 7 | 0.3445 |
-| 8 | 0.3586 |
+## 외부 검증
 
-**최적 k=5, Silhouette=0.4517**
+6개월 분할 검증에서는 후보 집중이 재현되지 않았다. 따라서 장기 고정 상태를 전제한 해석은 기각한다.
 
-### 클러스터 프로파일 (k=5, v1 — stale)
+현재 시점 운영 판단에는 분기 검증을 사용한다.
 
-| cluster | n | delta_level | delta_cp | delta_union | delta_authentic | arcane_stagnant | stagnation_score | parked_proxy% |
-|---|---|---|---|---|---|---|---|---|
-| **1 (파킹)** | **52** | **0.106** | **-28,000** | **6.1** | **0.04** | **1.000** | **4.46** | **78.8%** |
-| 0 | 890 | 0.342 | 1,669,930 | 32.5 | 0.72 | 0.000 | 1.42 | 25.7% |
-| 2 | 400 | 0.705 | 14,497,170 | 55.4 | 1.70 | 0.000 | 0.05 | 0.0% |
-| 3 | 8 | 10.576 | 5,226,256 | 218.1 | 0.79 | 0.125 | 0.88 | 0.0% |
-| 4 | 30 | 1.188 | 5,354,839 | 444.5 | 1.57 | 0.000 | 0.50 | 6.7% |
+| 학습 구간 | 검증 구간 | 엄격 후보 | 직전 정체 군집 포착 | Odds ratio | Fisher 단측 p |
+|---|---|---:|---:|---:|---:|
+| 2025-06 ~ 2025-08 | 2025-09 ~ 2025-11 | 34명 | 9명 | 0.99 | 0.5730 |
+| 2025-09 ~ 2025-11 | 2025-12 ~ 2026-02 | 36명 | 10명 | 0.57 | 0.9588 |
+| 2025-12 ~ 2026-02 | 2026-03 ~ 2026-05 | 35명 | 23명 | 2.19 | 0.0195 |
 
-- 파킹 클러스터(#1): `arcane_stagnant=1.000` (전원 아케인 정체), `delta_level≈0.1`
-- 레벨 분포: 260s 71.2%, 270s 26.9% → 파킹 주요 구간 집중
-- **stagnation_score=5 인원 36명 전원(100%)** 파킹 클러스터 소속
+엄격 후보는 검증 분기에서 세 성장축이 모두 정체이고, 3개월 중 2개월 이상 접속이 관측된 캐릭터다.
+최신 분기에서는 H1이 지지되지만 과거 분기 재현성은 일관되지 않다. 결론은 **현재 시점 후보 탐색에
+유효하나 시간 민감도가 높다**로 제한한다.
 
-### DBSCAN (eps=0.874, min_samples=10, v1 — stale)
+## 출력
 
-- 클러스터 수: 2개, noise=6.7% (93명)
-- DBSCAN 클러스터 1 (51명) ↔ K-Means 파킹 클러스터 (52명): **1명 차이, 거의 완벽 일치**
-- noise 93명 중 92명이 비파킹 → 파킹 클러스터는 밀도 기반으로도 뚜렷이 분리
-
-### PCA 시각화
-
-`figures/03_pca_3panel.png` 참조 (PC1=38.3%, PC2=21.8%)
-
-## 판정 (v1 기준 — 참고용)
-
-| 지표 | 값 | 기준 | 결과 |
-|---|---|---|---|
-| Silhouette Score | **0.4517** | > 0.3 | **H1 지지** |
-| 파킹 클러스터 규모 | 52명 (3.8%) | — | 확인 |
-| DBSCAN 일치율 | 51/52명 (98%) | — | 강한 재현성 |
-| stagnation=5 집중도 | 36/36명 (100%) | — | 완벽 일치 |
-
-**v2 데이터 기준 재실행 후 최종 판정 확정 예정.**
-
-## 출력 파일
-
-| 파일 | 내용 |
-|---|---|
-| `h1_clustering.ipynb` | 전체 실험 코드 |
-| `figures/01_kmeans_elbow_silhouette.png` | Elbow & Silhouette 곡선 |
-| `figures/02_dbscan_kdist.png` | 5-NN k-distance plot |
-| `figures/03_pca_3panel.png` | PCA 2D 3-panel 시각화 |
-| `data/cluster_labels.csv` | 클러스터 레이블 (H2/H3 입력) |
+- `data/cluster_labels.csv`: 전체 기간 성장 정체 군집 라벨
+- `data/h1_current_candidates.csv`: 최신 분기 후보와 고신뢰 후보 라벨

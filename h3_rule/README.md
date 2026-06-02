@@ -1,10 +1,10 @@
 # 가설 3 (지도) — Feature Importance 기반 Rule 평가
 
-Feature Importance로 도출한 단순 Rule이 일반 유저 피해를 최소화하면서 주차 유저를 식별할 수 있는지 평가한다. 분류기는 핵심 피처 식별 도구이며, **본 평가 대상은 Rule** 이다.
+Feature Importance로 도출한 단순 Rule이 일반 유저 피해를 최소화하면서 주차 후보를 식별할 수 있는지 평가한다. 분류기는 핵심 피처 식별 도구이며, **본 평가 대상은 Rule** 이다.
 
 ## 입력
 
-- `data/cluster_labels.csv` (H1 pseudo-label)
+- `data/h1_current_candidates.csv` (`is_current_parking_candidate`, 민감도 분석은 `is_high_confidence_candidate`)
 - `data/features_monthly.csv` 전체 피처
 - 전제: H1 수용 기준(Silhouette ≥ 0.4, ARI ≥ 0.7) 충족
 
@@ -13,12 +13,12 @@ Feature Importance로 도출한 단순 Rule이 일반 유저 피해를 최소화
 1. **분류기 학습** (importance 추출 용도)
    - Random Forest, XGBoost
    - 5-fold stratified CV (class imbalance 고려)
-   - pseudo-label = H1 클러스터 레이블
+   - pseudo-label = H1 현재 후보 레이블
 2. **Feature Importance 산출**
    - SHAP values (mean |SHAP|) 또는 permutation importance
    - 상위 2~3개 핵심 피처 선정
 3. **단순 Rule 도출**
-   - 예: `Δlevel < a AND Δunion_level < b AND arcane_stagnant = 1`
+   - 예: `ΔcumEXP = 0 AND Δunion_level = 0 AND access_active_months >= 2`
    - 임계값 a, b는 핵심 피처 분포의 분위수에서 후보 → grid search
 4. **Rule 단독 평가** (분류기 성능과 별도)
    - Precision, Recall, F1, **FPR (오타겟팅률)**, ROC-AUC

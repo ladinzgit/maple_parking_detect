@@ -1,7 +1,7 @@
 """
-collect_main_characters.py — 종합 랭킹 기반 본캐 수집 (260~285, 계열·직업·레벨 균형)
+collect_main_characters.py — 종합 랭킹 기반 본캐 수집 (270~290, 계열·직업·레벨 균형)
 
-ranking/overall (레벨 내림차순) 에서 직업명별 이진 탐색으로 260~285 페이지 범위를 확정하고
+ranking/overall (레벨 내림차순) 에서 직업명별 이진 탐색으로 270~290 페이지 범위를 확정하고
 5개 계열 × 400명을 수집한다. 계열 내에서도 직업(job)을 균형 있게 수집한다:
   - Phase 1(다양성): 가용 직업마다 base(=max(MIN_PER_CLASS, 400//직업수))명까지 우선 수집
   - Phase 2(채움): 목표 미달분을 MAX_PER_CLASS 한도 내 라운드로빈으로 채움
@@ -12,14 +12,14 @@ API 흐름: ranking/overall → id → character/basic(생성일 필터) → use
 신규 캐릭 필터: character_date_create > CREATE_CUTOFF 이면 제외 (12개월 윈도우 관측 불가 캐릭 배제)
 
 가설별 설계 근거:
-  - 레벨 260~285 제한 (H1): 285+ 캐릭터는 활성 유저도 Δlevel≈0 → 파킹 신호 오염 방지
-  - 5계열 × 400명 = 2,000명 (H3): 파킹 비율 ~10% 가정 시 ~200 minority class →
+  - 레벨 270~290 제한 (H1): 270~290 이 주차 후보 신호 구간; 저레벨대 정체 신호 + 고레벨(286~290) active 대조군
+  - 5계열 × 400명 = 2,000명 (H3): 주차 후보 비율 ~10% 가정 시 ~200 minority class →
                                     5-fold CV per fold ~40 → RF/XGBoost cross-fold variance 안정,
                                     Precision 95% CI ±2~3% 로 수용 기준(>0.95) 판정 가능
   - 5계열 균등 (H2): cluster × class_group Chi-Square 셀별 기대 빈도 ≥ 5 확보
   - 3 level_bin × 균등 (H2): cluster × level_band Chi-Square 셀별 기대 빈도 확보
   - 본캐 필터 (H1/H3): 부캐 성장 정체는 본캐 활동의 부산물 → 노이즈 제거
-  - world_type=0 (All): 리부트는 메소 거래 불가 → 파킹 인센티브 자체가 다름
+  - world_type=0 (All): 리부트는 메소 거래 불가 → 주차 후보 인센티브 자체가 다름
 
 재현성: RANDOM_SEED + TARGET_DATE 고정으로 동일 결과 보장.
 """
@@ -298,14 +298,14 @@ def find_page_range(class_name):
             if lv is None or lv < LEVEL_MIN:
                 hi = mid           # 너무 뒤 (빈 페이지 or 범위 하한 미달)
             elif lv > LEVEL_MAX:
-                lo = mid + 1       # 아직 285 초과 구간
+                lo = mid + 1       # 아직 290 초과 구간
             else:
                 hi = mid           # ≤ LEVEL_MAX 진입, 더 앞 탐색
         start_page = lo
 
     sp_lv = get_page_top_level(class_name, start_page)
     if sp_lv is None or sp_lv < LEVEL_MIN:
-        return None, None          # 260~285 캐릭터 없음
+        return None, None          # 270~290 캐릭터 없음
 
     # ── end_page 탐색 ────────────────────────────────────────
     lo, hi = start_page, last
@@ -602,9 +602,9 @@ def collect():
         print("     " + ", ".join(f"{c}:{n}" for c, n in sub.items()))
 
     # H2 검정 가능성 사전 확인: cluster × class_group × level_band 셀별 충분성
-    print("\n[H2 사전 확인] cluster_label 추가 시 셀 크기 (파킹 비율 10% 가정):")
-    print(f"  cluster × class_group  ({2 * len(GROUPS)}셀): 평균 {len(df) * 0.10 / len(GROUPS):.1f}/셀 (파킹)")
-    print(f"  cluster × level_band   ({2 * len(LEVEL_BINS)}셀): 평균 {len(df) * 0.10 / len(LEVEL_BINS):.1f}/셀 (파킹)")
+    print("\n[H2 사전 확인] cluster_label 추가 시 셀 크기 (주차 후보 비율 10% 가정):")
+    print(f"  cluster × class_group  ({2 * len(GROUPS)}셀): 평균 {len(df) * 0.10 / len(GROUPS):.1f}/셀 (주차 후보)")
+    print(f"  cluster × level_band   ({2 * len(LEVEL_BINS)}셀): 평균 {len(df) * 0.10 / len(LEVEL_BINS):.1f}/셀 (주차 후보)")
 
 
 if __name__ == "__main__":
