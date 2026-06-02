@@ -31,10 +31,16 @@ jupyter nbconvert --to notebook --execute --inplace h1_clustering/temporal_exter
 1. 전체 기간 성장 피처로 정체 군집을 탐색한다.
 2. 6개월 분할로 장기 고정 상태 해석 가능성을 확인한다.
 3. 분기 순차 검증으로 현재 시점 후보 탐색 성능을 확인한다.
-4. 최신 분기 후보 파일을 H2/H3 입력으로 사용한다.
+4. 최신 분기 후보 파일을 H2 입력과 H3 최종 Rule 평가에 사용한다.
+5. 전체 기간 성장 정체 군집 라벨을 H3 1단계 supervised 타깃으로 사용한다.
 
 ## H3 입력 규약 (지도 학습)
 
-- pseudo-label = `is_current_parking_candidate` (성장 정체 ∩ 접속 활성).
-- 접속 피처(`access_active_months`, `access_ratio`, `access_recent`)를 **분류기 입력 피처로 포함**한다. 휴면은 사전 필터가 아니라 모델이 성장×접속 결합으로 분리한다.
-- 클러스터링 3피처(cumEXP·union·hexa_frag)는 순환 방지로 제외/제한한다.
+- **1단계 supervised 타깃** = `data/cluster_labels.csv`의 `is_stagnant_cluster` (성장 정체 군집, 394명).
+- **1단계 입력 피처** = H1 미사용 성장·상태 피처 + 접속 피처(`access_active_months`, `access_ratio`, `access_recent`). 접속 중요도는 참고하되, 휴면을 사전 필터로 제거하지 않는다.
+- **순환 방지 제외 피처** = H1 클러스터링 3피처(cumEXP·union delta·hexa_frag delta)와 동일 신호의 recent3/recent6 파생값. H1 군집 경계를 직접 복제하는 피처는 사용하지 않는다.
+- **2단계 최종 Rule** = 1단계 성장 정체 Rule AND 최근 분기 반복 접속 게이트(`valid_access_active_months >= 2`).
+- **평가 분리**:
+  - 1단계 성장 정체 Rule: `is_stagnant_cluster` 대비 Precision / Recall / F1 / FPR / ROC-AUC.
+  - 최종 주차 후보 Rule: `is_current_parking_candidate` 대비 평가. `is_high_confidence_candidate`는 보수적 민감도 분석에 사용한다.
+- H3는 H1 군집을 다른 관측 피처로 근사하고 휴면을 제외하는 운영 Rule 실험이다. 실제 주차 유저 ground truth 검증으로 해석하지 않는다.

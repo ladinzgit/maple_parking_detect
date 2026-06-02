@@ -77,7 +77,7 @@ Total API calls: ~2,000 × 12 × 11 ≈ 264,000 → ~660 s at 400 req/s
 | `data/main_characters.csv` | ~2,000 main characters, level 270–290, 5계열 균등 |
 | `data/features_monthly.csv` | ~2,000 rows; 12-month delta features per character |
 | `data/cluster_labels.csv` | `cluster_km`, `is_stagnant_cluster` per character (성장 정체 군집, written by H1 notebook) |
-| `data/h1_current_candidates.csv` | `prior_stagnant_cluster`, `is_current_parking_candidate`, `is_high_confidence_candidate` (written by `temporal_external_validation.ipynb`; H2/H3 입력) |
+| `data/h1_current_candidates.csv` | `prior_stagnant_cluster`, `is_current_parking_candidate`, `is_high_confidence_candidate` (written by `temporal_external_validation.ipynb`; H2 입력, H3 최종 Rule 평가) |
 
 ### Feature columns in `features_monthly.csv`
 
@@ -127,7 +127,7 @@ Each hypothesis notebook is self-contained: loads `data/features_monthly.csv` an
 
 `exp_rank_within_level` is **excluded** — Spearman r=−0.094 (p=0.001) with Δlevel: statistically significant at n=1,192 but negligible effect size (|r|<0.1).
 
-`avg_monthly_delta_hexa_frag` (→ `delta_hfrag`) is **included in clustering (v3)** — the r≈0.93 with `avg_monthly_delta_hexa` is irrelevant because Δhexa is NOT in the feature set (no redundancy created); serves as high-level activity signal replacing arcane. `hexa_fragments_total` retained as H3 derived-feature candidate.
+`avg_monthly_delta_hexa_frag` (→ `delta_hfrag`) is **included in clustering (v3)** — the r≈0.93 with `avg_monthly_delta_hexa` is irrelevant because Δhexa is NOT in the feature set (no redundancy created); serves as high-level activity signal replacing arcane. H3 excludes the hexa_frag family, including `hexa_fragments_total`, to avoid reproducing the H1 boundary.
 
 ### Preprocessing
 
@@ -156,7 +156,7 @@ Each hypothesis notebook is self-contained: loads `data/features_monthly.csv` an
 - **H2 사전 결과**: 레벨구간×파킹 χ²=167.5, p=4.28e-37 (**기각**, 25.1%→12.3%→1.1% 단조감소) / 직업×파킹 χ²=3.55, p=0.470 (**미기각** — 260-285 데이터의 직업 유의성은 270-290 필터에서 소멸)
 - **hexa_fragments EDA**: r(delta_hexa_frag, delta_hexa) ≈ 0.93이나 Δhexa 미사용 → 중복 아님 → v3에서 `delta_hfrag` **클러스터링 채택** (arcane 대체)
 - **exp_rank_within_level**: Δlevel과 r=−0.094 (무시 가능) → 피처 제외
-- **hexa_fragments.csv** in `data/` — H3 추가 파생 피처 활용 가능 (hexa_fragments_total)
+- **hexa_fragments.csv** in `data/` — H1 clustering input. H3에서 hexa_frag family 제외.
 
 ### Output files (updated)
 
@@ -173,8 +173,8 @@ Each hypothesis notebook is self-contained: loads `data/features_monthly.csv` an
 | H3 Rule evaluation | `h3_rule/` (create notebook) | Not started |
 
 H2 uses `h1_current_candidates.csv` (from `temporal_external_validation.ipynb`) × level_band/class_group → Chi-Square (α=0.05).  
-H3 (supervised) uses `is_current_parking_candidate` / `is_high_confidence_candidate` (from `h1_current_candidates.csv`, = 성장 정체 ∩ 접속 활성) as pseudo-labels → Random Forest/XGBoost → threshold rules → Precision/Recall/FPR/ROC-AUC.
-**Access-as-input design**: access features (`access_active_months`, `access_ratio`, `access_recent`) are **included in the classifier input** so the model learns the growth×access combination directly — dormant accounts are NOT pre-filtered (pre-filtering would condition the sample on the validation variable → circular). Input = broad raw observable features + access; the 3 clustering features (cumEXP·union·hexa_frag) are excluded/limited to avoid reproducing the H1 boundary (circularity). Class imbalance: `class_weight='balanced'`/`scale_pos_weight`, stratified CV; if positive n too small, relax the access threshold for training labels and report precision on the strict label (2-tier). No ground truth → metrics are vs pseudo-label; FPR = dormant/normal misclassification rate.
+H3 (supervised) uses `is_stagnant_cluster` (394명, from `cluster_labels.csv`) as the stage-1 target → Random Forest/XGBoost → stagnant-growth threshold rule. The final candidate rule is `stagnant_growth_rule AND valid_access_active_months >= 2`, evaluated against `is_current_parking_candidate`; `is_high_confidence_candidate` is the conservative sensitivity label.
+**Two-stage access-gate design**: access features (`access_active_months`, `access_ratio`, `access_recent`) are included in classifier input for relative importance, but dormant accounts are NOT pre-filtered. The final access requirement is an explicit gate. Input = broad raw observable features + access; H1 clustering features (cumEXP·union delta·hexa_frag delta) and same-signal derivatives are excluded to avoid reproducing the H1 boundary. No ground truth → metrics are vs H1-derived labels; final-rule FPR = dormant/normal misclassification rate.
 
 ## Other Files
 

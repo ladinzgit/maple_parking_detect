@@ -1,0 +1,367 @@
+{
+  "alpha": 0.05,
+  "level_bins": [
+    "270-279",
+    "280-285",
+    "286-290"
+  ],
+  "class_groups": [
+    "전사",
+    "마법사",
+    "궁수",
+    "도적",
+    "해적"
+  ],
+  "labels": [
+    {
+      "label": "is_current_parking_candidate",
+      "description": "기본 라벨",
+      "n": 1940,
+      "candidate_n": 35,
+      "candidate_rate": 0.01804123711340206,
+      "tests": [
+        {
+          "dimension": "level_band",
+          "table": {
+            "270-279": {
+              "non_candidate": 605,
+              "candidate": 9
+            },
+            "280-285": {
+              "non_candidate": 637,
+              "candidate": 19
+            },
+            "286-290": {
+              "non_candidate": 663,
+              "candidate": 7
+            }
+          },
+          "chi2": 6.994777269321974,
+          "dof": 2,
+          "p_value": 0.030276342873833663,
+          "monte_carlo_p_value": 0.02725972740272597,
+          "monte_carlo_iterations": 100000,
+          "min_expected_frequency": 11.077319587628866,
+          "cramers_v": 0.06004627626643417,
+          "categories": [
+            {
+              "category": "270-279",
+              "n": 614,
+              "candidate_n": 9,
+              "candidate_rate": 0.014657980456026058,
+              "candidate_standardized_residual": -0.6241456865010487,
+              "odds_ratio_vs_rest": 0.743801652892562,
+              "odds_ratio_ci95": [
+                0.3464154808169949,
+                1.5970443859521808
+              ],
+              "fisher_p_vs_rest": 0.5825223821401737
+            },
+            {
+              "category": "280-285",
+              "n": 656,
+              "candidate_n": 19,
+              "candidate_rate": 0.028963414634146343,
+              "candidate_standardized_residual": 2.082706121086187,
+              "odds_ratio_vs_rest": 2.3638147566718994,
+              "odds_ratio_ci95": [
+                1.207377851828213,
+                4.627896888616145
+              ],
+              "fisher_p_vs_rest": 0.017555330859514502
+            },
+            {
+              "category": "286-290",
+              "n": 670,
+              "candidate_n": 7,
+              "candidate_rate": 0.010447761194029851,
+              "candidate_standardized_residual": -1.4633387199356693,
+              "odds_ratio_vs_rest": 0.4683257918552036,
+              "odds_ratio_ci95": [
+                0.2034794789716235,
+                1.077892711467923
+              ],
+              "fisher_p_vs_rest": 0.07398709331294595
+            }
+          ],
+          "holm_adjusted_p_value": 0.060552685747667326
+        },
+        {
+          "dimension": "class_group",
+          "table": {
+            "전사": {
+              "non_candidate": 384,
+              "candidate": 8
+            },
+            "마법사": {
+              "non_candidate": 385,
+              "candidate": 6
+            },
+            "궁수": {
+              "non_candidate": 372,
+              "candidate": 10
+            },
+            "도적": {
+              "non_candidate": 385,
+              "candidate": 4
+            },
+            "해적": {
+              "non_candidate": 379,
+              "candidate": 7
+            }
+          },
+          "chi2": 3.033900965989873,
+          "dof": 4,
+          "p_value": 0.5521682711822689,
+          "monte_carlo_p_value": 0.5689943100568994,
+          "monte_carlo_iterations": 100000,
+          "min_expected_frequency": 6.891752577319588,
+          "cramers_v": 0.03954575169742469,
+          "categories": [
+            {
+              "category": "전사",
+              "n": 392,
+              "candidate_n": 8,
+              "candidate_rate": 0.02040816326530612,
+              "candidate_standardized_residual": 0.3488948705116654,
+              "odds_ratio_vs_rest": 1.1736111111111112,
+              "odds_ratio_ci95": [
+                0.528987444475151,
+                2.603772650010709
+              ],
+              "fisher_p_vs_rest": 0.6724666538082098
+            },
+            {
+              "category": "마법사",
+              "n": 391,
+              "candidate_n": 6,
+              "candidate_rate": 0.015345268542199489,
+              "candidate_standardized_residual": -0.3968898993823012,
+              "odds_ratio_vs_rest": 0.8168383340797134,
+              "odds_ratio_ci95": [
+                0.3367372133366238,
+                1.9814408315932734
+              ],
+              "fisher_p_vs_rest": 0.8320405727804309
+            },
+            {
+              "category": "궁수",
+              "n": 382,
+              "candidate_n": 10,
+              "candidate_rate": 0.02617801047120419,
+              "candidate_standardized_residual": 1.1839973859472448,
+              "odds_ratio_vs_rest": 1.6483870967741936,
+              "odds_ratio_ci95": [
+                0.7848479687624506,
+                3.4620463184686683
+              ],
+              "fisher_p_vs_rest": 0.19708602196057617
+            },
+            {
+              "category": "도적",
+              "n": 389,
+              "candidate_n": 4,
+              "candidate_rate": 0.010282776349614395,
+              "candidate_standardized_residual": -1.1392452109304247,
+              "odds_ratio_vs_rest": 0.5094260578131546,
+              "odds_ratio_ci95": [
+                0.17875016200695582,
+                1.4518303394262262
+              ],
+              "fisher_p_vs_rest": 0.285045057455494
+            },
+            {
+              "category": "해적",
+              "n": 386,
+              "candidate_n": 7,
+              "candidate_rate": 0.018134715025906734,
+              "candidate_standardized_residual": 0.013673179038151533,
+              "odds_ratio_vs_rest": 1.0065963060686016,
+              "odds_ratio_ci95": [
+                0.4363632007716667,
+                2.322001767333136
+              ],
+              "fisher_p_vs_rest": 1.0
+            }
+          ],
+          "holm_adjusted_p_value": 0.5521682711822689
+        }
+      ]
+    },
+    {
+      "label": "is_high_confidence_candidate",
+      "description": "고신뢰 민감도 라벨",
+      "n": 1940,
+      "candidate_n": 23,
+      "candidate_rate": 0.011855670103092783,
+      "tests": [
+        {
+          "dimension": "level_band",
+          "table": {
+            "270-279": {
+              "non_candidate": 606,
+              "candidate": 8
+            },
+            "280-285": {
+              "non_candidate": 644,
+              "candidate": 12
+            },
+            "286-290": {
+              "non_candidate": 667,
+              "candidate": 3
+            }
+          },
+          "chi2": 5.505635772842686,
+          "dof": 2,
+          "p_value": 0.06374797332550966,
+          "monte_carlo_p_value": 0.06007939920600794,
+          "monte_carlo_iterations": 100000,
+          "min_expected_frequency": 7.279381443298969,
+          "cramers_v": 0.05327247491847482,
+          "categories": [
+            {
+              "category": "270-279",
+              "n": 614,
+              "candidate_n": 8,
+              "candidate_rate": 0.013029315960912053,
+              "candidate_standardized_residual": 0.2670903534819288,
+              "odds_ratio_vs_rest": 1.1537953795379539,
+              "odds_ratio_ci95": [
+                0.48655237850823047,
+                2.7360749564614695
+              ],
+              "fisher_p_vs_rest": 0.8220188611425985
+            },
+            {
+              "category": "280-285",
+              "n": 656,
+              "candidate_n": 12,
+              "candidate_rate": 0.018292682926829267,
+              "candidate_standardized_residual": 1.5141651315960465,
+              "odds_ratio_vs_rest": 2.1564088085827215,
+              "odds_ratio_ci95": [
+                0.94631722979986,
+                4.913890187455023
+              ],
+              "fisher_p_vs_rest": 0.07544112886501957
+            },
+            {
+              "category": "286-290",
+              "n": 670,
+              "candidate_n": 3,
+              "candidate_rate": 0.004477611940298508,
+              "candidate_standardized_residual": -1.7539468260890068,
+              "odds_ratio_vs_rest": 0.2811094452773613,
+              "odds_ratio_ci95": [
+                0.08322912613455351,
+                0.9494575263999885
+              ],
+              "fisher_p_vs_rest": 0.028054758659189025
+            }
+          ],
+          "holm_adjusted_p_value": 0.12749594665101932
+        },
+        {
+          "dimension": "class_group",
+          "table": {
+            "전사": {
+              "non_candidate": 385,
+              "candidate": 7
+            },
+            "마법사": {
+              "non_candidate": 388,
+              "candidate": 3
+            },
+            "궁수": {
+              "non_candidate": 376,
+              "candidate": 6
+            },
+            "도적": {
+              "non_candidate": 386,
+              "candidate": 3
+            },
+            "해적": {
+              "non_candidate": 382,
+              "candidate": 4
+            }
+          },
+          "chi2": 2.9163484444886603,
+          "dof": 4,
+          "p_value": 0.5719204710263582,
+          "monte_carlo_p_value": 0.5731542684573154,
+          "monte_carlo_iterations": 100000,
+          "min_expected_frequency": 4.528865979381443,
+          "cramers_v": 0.03877205687175133,
+          "categories": [
+            {
+              "category": "전사",
+              "n": 392,
+              "candidate_n": 7,
+              "candidate_rate": 0.017857142857142856,
+              "candidate_standardized_residual": 1.091284079093036,
+              "odds_ratio_vs_rest": 1.740909090909091,
+              "odds_ratio_ci95": [
+                0.7112053496395059,
+                4.261447786277402
+              ],
+              "fisher_p_vs_rest": 0.2917074763512463
+            },
+            {
+              "category": "마법사",
+              "n": 391,
+              "candidate_n": 3,
+              "candidate_rate": 0.0076726342710997444,
+              "candidate_standardized_residual": -0.7596558916324611,
+              "odds_ratio_vs_rest": 0.5911082474226804,
+              "odds_ratio_ci95": [
+                0.17475454346418076,
+                1.9994270434675747
+              ],
+              "fisher_p_vs_rest": 0.6001950104454913
+            },
+            {
+              "category": "궁수",
+              "n": 382,
+              "candidate_n": 6,
+              "candidate_rate": 0.015706806282722512,
+              "candidate_standardized_residual": 0.6912855905347738,
+              "odds_ratio_vs_rest": 1.4464956195244054,
+              "odds_ratio_ci95": [
+                0.5664416745619306,
+                3.6938482305728217
+              ],
+              "fisher_p_vs_rest": 0.4305392569365852
+            },
+            {
+              "category": "도적",
+              "n": 389,
+              "candidate_n": 3,
+              "candidate_rate": 0.007712082262210797,
+              "candidate_standardized_residual": -0.7505649807757274,
+              "odds_ratio_vs_rest": 0.5949481865284975,
+              "odds_ratio_ci95": [
+                0.17588631319314899,
+                2.0124553083607135
+              ],
+              "fisher_p_vs_rest": 0.5998372276364227
+            },
+            {
+              "category": "해적",
+              "n": 386,
+              "candidate_n": 4,
+              "candidate_rate": 0.010362694300518135,
+              "candidate_standardized_residual": -0.2693911772931904,
+              "odds_ratio_vs_rest": 0.8459630752273354,
+              "odds_ratio_ci95": [
+                0.2861261964631401,
+                2.501181413985922
+              ],
+              "fisher_p_vs_rest": 1.0
+            }
+          ],
+          "holm_adjusted_p_value": 0.5719204710263582
+        }
+      ]
+    }
+  ]
+}

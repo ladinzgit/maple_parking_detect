@@ -22,3 +22,13 @@
 ## 수용 기준
 
 최소 한 교차표에서 `p < 0.05`이고, 효과 크기와 표준화 잔차 해석이 함께 제시되어야 한다.
+
+## 실행
+
+```bash
+python h2_distribution/run_analysis.py
+jupyter nbconvert --to notebook --execute --inplace h2_distribution/h2_distribution.ipynb
+```
+
+실행 시 `RESULTS.md`, `results.json`, `figures/candidate_distribution.png`를 갱신한다.
+기본 검정과 함께 Holm 다중검정 보정 및 고신뢰 후보 라벨 민감도 분석을 보고한다.
