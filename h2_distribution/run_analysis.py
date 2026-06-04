@@ -339,13 +339,13 @@ def build_summary(results: dict) -> str:
         [
             "## 판정",
             "",
-            "H1 클러스터 후보 412명 기준으로 레벨 구간 분포는 Holm 보정 후에도 유의해 H2의 레벨 구간 불균형 가설을 지지한다. "
-            f"후보는 `{top_band['category']}` 구간에 강하게 집중되고 `{low_band['category']}` 구간에서는 드물다. "
-            f"레벨 효과의 Cramer's V는 {primary_level['cramers_v']:.3f}로, 63명 현재성 라벨에서 보였던 작은 효과보다 훨씬 크다.",
+            f"H1 클러스터 후보 {primary['candidate_n']}명 기준으로 레벨 구간 분포는 Holm 보정 후에도 {decision(primary_level)}하다(p={format_p(primary_level['holm_adjusted_p_value'])}, Cramer's V={primary_level['cramers_v']:.3f}). "
+            f"후보는 `{top_band['category']}` 구간에 집중되고(비율 {format_rate(top_band['candidate_rate'])}) `{low_band['category']}` 구간에서는 낮다(비율 {format_rate(low_band['candidate_rate'])}). H2의 레벨 구간 불균형 가설을 지지한다.",
             "",
-            "반면 직업 계열 분포는 H1 클러스터 후보, 현재성 후보, 고신뢰 현재성 후보 모두에서 유의하지 않다. "
-            "따라서 H2의 결론은 `레벨 구간 집중은 확인, 직업 계열 집중은 미확인`으로 정리한다. "
-            "이 결과는 H1 파생 후보 라벨의 분포 검정이며 실제 주차 유저 ground truth 검정은 아니다.",
+            (f"직업 계열 분포는 Holm 보정 p={format_p(primary_class['holm_adjusted_p_value'])}로 {decision(primary_class)}하나, "
+             f"Cramer's V={primary_class['cramers_v']:.3f}로 효과크기는 무시할 수준이다(대표본 χ² 민감도). "
+             "따라서 H2 결론은 `레벨 구간 집중은 확인(작은~중간 효과), 직업 계열은 실질적 집중 없음(효과크기 무시 가능)`으로 정리한다. "
+             "이 결과는 H1 파생 후보 라벨의 분포 검정이며 실제 주차 유저 ground truth 검정은 아니다."),
             "",
             "## 재현",
             "",

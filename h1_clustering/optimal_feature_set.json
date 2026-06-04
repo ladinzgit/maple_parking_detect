@@ -1,14 +1,13 @@
 {
   "features": [
-    "cumexp_avg",
-    "union_avg",
-    "access_ratio"
+    "cp_slog",
+    "hexa_avg"
   ],
   "k": 3,
-  "silhouette": 0.5446,
-  "elbow_k": 4,
-  "stagnant_cluster_id": 1,
-  "source": "family-diverse",
-  "stagnant_n": 412,
-  "stagnant_size_pct": 20.8
+  "silhouette": 0.6431,
+  "elbow_k": 3,
+  "stagnant_cluster_id": 0,
+  "source": "family-diverse (user-pinned)",
+  "stagnant_n": 471,
+  "stagnant_size_pct": 23.6
 }

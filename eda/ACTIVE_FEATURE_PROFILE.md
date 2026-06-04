@@ -64,4 +64,4 @@
 
 - `features_monthly.csv` and `hexa_fragments.csv` can contain old OCIDs because collectors append and deduplicate rather than pruning removed samples. This profile filters all analysis to the current `main_characters.csv` OCID set.
 - `avg_monthly_delta_combat_power` is heavy-tailed and can be negative because monthly stat snapshots are noisy; downstream analysis should keep the existing winsorization/clipping step.
-- H1 currently uses `log1p_avg_monthly_delta_cumexp`, `avg_monthly_delta_union_level`, and `access_ratio`.
+- H1 (재설계 2026-06) uses `cp_slog` (= `sign(x)·log1p(|x|)` of winsorized `avg_monthly_delta_combat_power`) and `hexa_avg` (= clip≥0 `avg_monthly_delta_hexa`). Access is a **control variable** (sample restricted to `access_active_months ≥ 10`), not a clustering feature.

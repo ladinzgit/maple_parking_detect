@@ -20,175 +20,175 @@
       "label": "is_stagnant_cluster",
       "description": "H1 클러스터 후보",
       "dataset": "cluster",
-      "n": 1979,
-      "candidate_n": 412,
-      "candidate_rate": 0.20818595250126326,
+      "n": 1999,
+      "candidate_n": 471,
+      "candidate_rate": 0.23561780890445222,
       "tests": [
         {
           "dimension": "level_band",
           "table": {
             "270-279": {
-              "non_candidate": 413,
-              "candidate": 277
+              "non_candidate": 464,
+              "candidate": 200
             },
             "280-285": {
-              "non_candidate": 569,
-              "candidate": 118
+              "non_candidate": 501,
+              "candidate": 164
             },
             "286-290": {
-              "non_candidate": 585,
-              "candidate": 17
+              "non_candidate": 563,
+              "candidate": 107
             }
           },
-          "chi2": 280.1228864857393,
+          "chi2": 37.74608939465061,
           "dof": 2,
-          "p_value": 1.48623701133795e-61,
+          "p_value": 6.361226086199097e-09,
           "monte_carlo_p_value": 9.99990000099999e-06,
           "monte_carlo_iterations": 100000,
-          "min_expected_frequency": 125.32794340576048,
-          "cramers_v": 0.3762282472518333,
+          "min_expected_frequency": 156.45022511255627,
+          "cramers_v": 0.13741355806577257,
           "categories": [
             {
               "category": "270-279",
-              "n": 690,
-              "candidate_n": 277,
-              "candidate_rate": 0.40144927536231884,
-              "candidate_standardized_residual": 11.12623623468434,
-              "odds_ratio_vs_rest": 5.733261590888709,
+              "n": 664,
+              "candidate_n": 200,
+              "candidate_rate": 0.30120481927710846,
+              "candidate_standardized_residual": 3.481751875890865,
+              "odds_ratio_vs_rest": 1.6923272681002672,
               "odds_ratio_ci95": [
-                4.535152143620763,
-                7.247891014151698
+                1.3679715212192347,
+                2.0935900623158705
               ],
-              "fisher_p_vs_rest": 6.4835703531295126e-52
+              "fisher_p_vs_rest": 1.844776955209719e-06
             },
             {
               "category": "280-285",
-              "n": 687,
-              "candidate_n": 118,
-              "candidate_rate": 0.1717612809315866,
-              "candidate_standardized_residual": -2.0924173003768467,
-              "odds_ratio_vs_rest": 0.7039680547087025,
+              "n": 665,
+              "candidate_n": 164,
+              "candidate_rate": 0.24661654135338346,
+              "candidate_standardized_residual": 0.5843181867682711,
+              "odds_ratio_vs_rest": 1.0950606929463549,
               "odds_ratio_ci95": [
-                0.5553609465201654,
-                0.8923404232068384
+                0.8809256396442394,
+                1.3612476096398207
               ],
-              "fisher_p_vs_rest": 0.003626041081590206
+              "fisher_p_vs_rest": 0.4336774955762171
             },
             {
               "category": "286-290",
-              "n": 602,
-              "candidate_n": 17,
-              "candidate_rate": 0.02823920265780731,
-              "candidate_standardized_residual": -9.676460801159859,
-              "odds_ratio_vs_rest": 0.07224494211835984,
+              "n": 670,
+              "candidate_n": 107,
+              "candidate_rate": 0.15970149253731344,
+              "candidate_standardized_residual": -4.0482606941887695,
+              "odds_ratio_vs_rest": 0.5038500575800754,
               "odds_ratio_ci95": [
-                0.04398708742365131,
-                0.11865599582478364
+                0.39662289870897527,
+                0.6400661216227972
               ],
-              "fisher_p_vs_rest": 3.558658995014879e-49
+              "fisher_p_vs_rest": 7.793732903659718e-09
             }
           ],
-          "holm_adjusted_p_value": 2.9724740226759e-61
+          "holm_adjusted_p_value": 1.2722452172398194e-08
         },
         {
           "dimension": "class_group",
           "table": {
             "전사": {
-              "non_candidate": 310,
-              "candidate": 85
-            },
-            "마법사": {
-              "non_candidate": 322,
-              "candidate": 73
-            },
-            "궁수": {
-              "non_candidate": 310,
+              "non_candidate": 312,
               "candidate": 88
             },
+            "마법사": {
+              "non_candidate": 314,
+              "candidate": 85
+            },
+            "궁수": {
+              "non_candidate": 306,
+              "candidate": 94
+            },
             "도적": {
-              "non_candidate": 317,
-              "candidate": 82
+              "non_candidate": 283,
+              "candidate": 117
             },
             "해적": {
-              "non_candidate": 308,
-              "candidate": 84
+              "non_candidate": 313,
+              "candidate": 87
             }
           },
-          "chi2": 1.93565869089627,
+          "chi2": 9.5877940431281,
           "dof": 4,
-          "p_value": 0.747591730177826,
-          "monte_carlo_p_value": 0.7466025339746603,
+          "p_value": 0.04797420081150305,
+          "monte_carlo_p_value": 0.04895951040489595,
           "monte_carlo_iterations": 100000,
-          "min_expected_frequency": 81.6088933804952,
-          "cramers_v": 0.03127458055726697,
+          "min_expected_frequency": 94.01150575287645,
+          "cramers_v": 0.06925528982791584,
           "categories": [
             {
               "category": "전사",
-              "n": 395,
-              "candidate_n": 85,
-              "candidate_rate": 0.21518987341772153,
-              "candidate_standardized_residual": 0.30508023382688404,
-              "odds_ratio_vs_rest": 1.0540100621485646,
+              "n": 400,
+              "candidate_n": 88,
+              "candidate_rate": 0.22,
+              "candidate_standardized_residual": -0.6434962846533243,
+              "odds_ratio_vs_rest": 0.8954944098547232,
               "odds_ratio_ci95": [
-                0.8053686822924753,
-                1.3794144663635883
+                0.6884199559622505,
+                1.1648561770121488
               ],
-              "fisher_p_vs_rest": 0.7291292785401797
+              "fisher_p_vs_rest": 0.42983207602925655
             },
             {
               "category": "마법사",
-              "n": 395,
-              "candidate_n": 73,
-              "candidate_rate": 0.1848101265822785,
-              "candidate_standardized_residual": -1.0182157283504398,
-              "odds_ratio_vs_rest": 0.8326004507228055,
+              "n": 399,
+              "candidate_n": 85,
+              "candidate_rate": 0.21303258145363407,
+              "candidate_standardized_residual": -0.9294089705857037,
+              "odds_ratio_vs_rest": 0.8513745420943203,
               "odds_ratio_ci95": [
-                0.6286236576442459,
-                1.1027639544169554
+                0.6527840443754312,
+                1.1103804040122065
               ],
-              "fisher_p_vs_rest": 0.21289053689566967
+              "fisher_p_vs_rest": 0.26230127497181305
             },
             {
               "category": "궁수",
-              "n": 398,
-              "candidate_n": 88,
-              "candidate_rate": 0.22110552763819097,
-              "candidate_standardized_residual": 0.5648902217292152,
-              "odds_ratio_vs_rest": 1.1013142174432498,
+              "n": 400,
+              "candidate_n": 94,
+              "candidate_rate": 0.235,
+              "candidate_standardized_residual": -0.025455410363448814,
+              "odds_ratio_vs_rest": 0.9957178273608294,
               "odds_ratio_ci95": [
-                0.8437673106190225,
-                1.437473329765299
+                0.7690009292786981,
+                1.2892754143406915
               ],
-              "fisher_p_vs_rest": 0.48994017599591216
+              "fisher_p_vs_rest": 1.0
             },
             {
               "category": "도적",
-              "n": 399,
-              "candidate_n": 82,
-              "candidate_rate": 0.20551378446115287,
-              "candidate_standardized_residual": -0.11698347079151615,
-              "odds_ratio_vs_rest": 0.9798298441831564,
+              "n": 400,
+              "candidate_n": 117,
+              "candidate_rate": 0.2925,
+              "candidate_standardized_residual": 2.343701274414407,
+              "odds_ratio_vs_rest": 1.4540037132418997,
               "odds_ratio_ci95": [
-                0.7469026501223004,
-                1.285397130931031
+                1.1373101987415306,
+                1.8588831793301248
               ],
-              "fisher_p_vs_rest": 0.9449984770093558
+              "fisher_p_vs_rest": 0.0036907641392010266
             },
             {
               "category": "해적",
-              "n": 392,
-              "candidate_n": 84,
-              "candidate_rate": 0.21428571428571427,
-              "candidate_standardized_residual": 0.2646855285785165,
-              "odds_ratio_vs_rest": 1.046840354767184,
+              "n": 400,
+              "candidate_n": 87,
+              "candidate_rate": 0.2175,
+              "candidate_standardized_residual": -0.7465030970349702,
+              "odds_ratio_vs_rest": 0.8794678514376997,
               "odds_ratio_ci95": [
-                0.7990335419237328,
-                1.3715002823669753
+                0.6755362946966694,
+                1.1449624657987414
               ],
-              "fisher_p_vs_rest": 0.7288568571055123
+              "fisher_p_vs_rest": 0.35695844856747444
             }
           ],
-          "holm_adjusted_p_value": 0.747591730177826
+          "holm_adjusted_p_value": 0.04797420081150305
         }
       ]
     },
@@ -196,175 +196,175 @@
       "label": "is_current_parking_candidate",
       "description": "현재성 후보",
       "dataset": "current",
-      "n": 1884,
-      "candidate_n": 63,
-      "candidate_rate": 0.03343949044585987,
+      "n": 1897,
+      "candidate_n": 52,
+      "candidate_rate": 0.027411702688455455,
       "tests": [
         {
           "dimension": "level_band",
           "table": {
             "270-279": {
-              "non_candidate": 564,
-              "candidate": 31
-            },
-            "280-285": {
-              "non_candidate": 663,
+              "non_candidate": 539,
               "candidate": 24
             },
+            "280-285": {
+              "non_candidate": 643,
+              "candidate": 21
+            },
             "286-290": {
-              "non_candidate": 594,
-              "candidate": 8
+              "non_candidate": 663,
+              "candidate": 7
             }
           },
-          "chi2": 14.021048643926544,
+          "chi2": 12.564486730373439,
           "dof": 2,
-          "p_value": 0.000902335350100045,
-          "monte_carlo_p_value": 0.0007399926000739993,
+          "p_value": 0.0018692025831451248,
+          "monte_carlo_p_value": 0.0015199848001519985,
           "monte_carlo_iterations": 100000,
-          "min_expected_frequency": 19.896496815286625,
-          "cramers_v": 0.08626801373143442,
+          "min_expected_frequency": 15.432788613600422,
+          "cramers_v": 0.08138393985940494,
           "categories": [
             {
               "category": "270-279",
-              "n": 595,
-              "candidate_n": 31,
-              "candidate_rate": 0.052100840336134456,
-              "candidate_standardized_residual": 2.4892683260910666,
-              "odds_ratio_vs_rest": 2.1590757978723403,
+              "n": 563,
+              "candidate_n": 24,
+              "candidate_rate": 0.04262877442273535,
+              "candidate_standardized_residual": 2.1808072333317874,
+              "odds_ratio_vs_rest": 2.0768619135966073,
               "odds_ratio_ci95": [
-                1.3045456239726048,
-                3.573357815392109
+                1.1930101275770768,
+                3.6155228764975327
               ],
-              "fisher_p_vs_rest": 0.0034634969176325354
+              "fisher_p_vs_rest": 0.012893218560688455
             },
             {
               "category": "280-285",
-              "n": 687,
-              "candidate_n": 24,
-              "candidate_rate": 0.034934497816593885,
-              "candidate_standardized_residual": 0.2142850520444382,
-              "odds_ratio_vs_rest": 1.0748346675948486,
+              "n": 664,
+              "candidate_n": 21,
+              "candidate_rate": 0.03162650602409638,
+              "candidate_standardized_residual": 0.6559841536095811,
+              "odds_ratio_vs_rest": 1.2663422465258616,
               "odds_ratio_ci95": [
-                0.6406883945437907,
-                1.8031691731927677
+                0.721783790863898,
+                2.221749373751939
               ],
-              "fisher_p_vs_rest": 0.7910952569736885
+              "fisher_p_vs_rest": 0.46129937652382547
             },
             {
               "category": "286-290",
-              "n": 602,
-              "candidate_n": 8,
-              "candidate_rate": 0.013289036544850499,
-              "candidate_standardized_residual": -2.703667331412486,
-              "odds_ratio_vs_rest": 0.3004591368227732,
+              "n": 670,
+              "candidate_n": 7,
+              "candidate_rate": 0.010447761194029851,
+              "candidate_standardized_residual": -2.652138261280561,
+              "odds_ratio_vs_rest": 0.277325289089995,
               "odds_ratio_ci95": [
-                0.14219753470915042,
-                0.634861167494465
+                0.12436059681155057,
+                0.6184379774680043
               ],
-              "fisher_p_vs_rest": 0.0005059305375144865
+              "fisher_p_vs_rest": 0.0005781738245083893
             }
           ],
-          "holm_adjusted_p_value": 0.00180467070020009
+          "holm_adjusted_p_value": 0.0037384051662902496
         },
         {
           "dimension": "class_group",
           "table": {
             "전사": {
-              "non_candidate": 363,
-              "candidate": 11
+              "non_candidate": 378,
+              "candidate": 7
             },
             "마법사": {
-              "non_candidate": 365,
-              "candidate": 15
+              "non_candidate": 368,
+              "candidate": 13
             },
             "궁수": {
-              "non_candidate": 366,
-              "candidate": 15
+              "non_candidate": 371,
+              "candidate": 11
             },
             "도적": {
-              "non_candidate": 377,
-              "candidate": 10
+              "non_candidate": 379,
+              "candidate": 9
             },
             "해적": {
-              "non_candidate": 350,
+              "non_candidate": 349,
               "candidate": 12
             }
           },
-          "chi2": 1.722887434505178,
+          "chi2": 2.6197198860455044,
           "dof": 4,
-          "p_value": 0.7865560149093997,
-          "monte_carlo_p_value": 0.7887321126788732,
+          "p_value": 0.6233338362066847,
+          "monte_carlo_p_value": 0.6261837381626184,
           "monte_carlo_iterations": 100000,
-          "min_expected_frequency": 12.105095541401274,
-          "cramers_v": 0.03024043280570954,
+          "min_expected_frequency": 9.89562467053242,
+          "cramers_v": 0.037161545116536014,
           "categories": [
             {
               "category": "전사",
-              "n": 374,
-              "candidate_n": 11,
-              "candidate_rate": 0.029411764705882353,
-              "candidate_standardized_residual": -0.42595710436943846,
-              "odds_ratio_vs_rest": 0.8496503496503497,
+              "n": 385,
+              "candidate_n": 7,
+              "candidate_rate": 0.01818181818181818,
+              "candidate_standardized_residual": -1.0938521509154442,
+              "odds_ratio_vs_rest": 0.6037037037037037,
               "odds_ratio_ci95": [
-                0.438899877952353,
-                1.6448072850440199
+                0.2700889017885321,
+                1.3494007323222938
               ],
-              "fisher_p_vs_rest": 0.7485416522020787
+              "fisher_p_vs_rest": 0.2928240879939924
             },
             {
               "category": "마법사",
-              "n": 380,
-              "candidate_n": 15,
-              "candidate_rate": 0.039473684210526314,
-              "candidate_standardized_residual": 0.6432521175402258,
-              "odds_ratio_vs_rest": 1.2465753424657535,
+              "n": 381,
+              "candidate_n": 13,
+              "candidate_rate": 0.03412073490813648,
+              "candidate_standardized_residual": 0.7909597047165269,
+              "odds_ratio_vs_rest": 1.3378623188405796,
               "odds_ratio_ci95": [
-                0.690306981659104,
-                2.2511000550925933
+                0.7068534571231992,
+                2.53217348820511
               ],
-              "fisher_p_vs_rest": 0.42906018181774697
+              "fisher_p_vs_rest": 0.3801998950657992
             },
             {
               "category": "궁수",
-              "n": 381,
-              "candidate_n": 15,
-              "candidate_rate": 0.03937007874015748,
-              "candidate_standardized_residual": 0.6330389587653205,
-              "odds_ratio_vs_rest": 1.2423155737704918,
+              "n": 382,
+              "candidate_n": 11,
+              "candidate_rate": 0.028795811518324606,
+              "candidate_standardized_residual": 0.1633931758978208,
+              "odds_ratio_vs_rest": 1.06593912300309,
               "odds_ratio_ci95": [
-                0.6879637619688631,
-                2.2433565111276277
+                0.5426212763988206,
+                2.0939580944730274
               ],
-              "fisher_p_vs_rest": 0.5225990176076226
+              "fisher_p_vs_rest": 0.8608975936974547
             },
             {
               "category": "도적",
-              "n": 387,
-              "candidate_n": 10,
-              "candidate_rate": 0.025839793281653745,
-              "candidate_standardized_residual": -0.8175643461581396,
-              "odds_ratio_vs_rest": 0.7226865522246134,
+              "n": 388,
+              "candidate_n": 9,
+              "candidate_rate": 0.023195876288659795,
+              "candidate_standardized_residual": -0.5015688716909625,
+              "odds_ratio_vs_rest": 0.8095968583174817,
               "odds_ratio_ci95": [
-                0.3642278958484411,
-                1.4339260081924727
+                0.3912134809837247,
+                1.6754204669772221
               ],
-              "fisher_p_vs_rest": 0.42855227809161667
+              "fisher_p_vs_rest": 0.7272295736801069
             },
             {
               "category": "해적",
-              "n": 362,
+              "n": 361,
               "candidate_n": 12,
-              "candidate_rate": 0.03314917127071823,
-              "candidate_standardized_residual": -0.030206484292322203,
-              "odds_ratio_vs_rest": 0.9889075630252101,
+              "candidate_rate": 0.0332409972299169,
+              "candidate_standardized_residual": 0.6689622245502883,
+              "odds_ratio_vs_rest": 1.2859598853868195,
               "odds_ratio_ci95": [
-                0.5216691234617676,
-                1.8746330273850902
+                0.6676128921725232,
+                2.477023506006139
               ],
-              "fisher_p_vs_rest": 1.0
+              "fisher_p_vs_rest": 0.4729484519722005
             }
           ],
-          "holm_adjusted_p_value": 0.7865560149093997
+          "holm_adjusted_p_value": 0.6233338362066847
         }
       ]
     },
@@ -372,175 +372,175 @@
       "label": "is_high_confidence_candidate",
       "description": "고신뢰 현재성 후보",
       "dataset": "current",
-      "n": 1884,
-      "candidate_n": 35,
-      "candidate_rate": 0.018577494692144373,
+      "n": 1897,
+      "candidate_n": 39,
+      "candidate_rate": 0.02055877701634159,
       "tests": [
         {
           "dimension": "level_band",
           "table": {
             "270-279": {
-              "non_candidate": 576,
-              "candidate": 19
+              "non_candidate": 545,
+              "candidate": 18
             },
             "280-285": {
-              "non_candidate": 676,
-              "candidate": 11
+              "non_candidate": 648,
+              "candidate": 16
             },
             "286-290": {
-              "non_candidate": 597,
+              "non_candidate": 665,
               "candidate": 5
             }
           },
-          "chi2": 9.552608574727758,
+          "chi2": 9.761156272261466,
           "dof": 2,
-          "p_value": 0.008427085575170409,
-          "monte_carlo_p_value": 0.0066999330006699935,
+          "p_value": 0.007592623188656148,
+          "monte_carlo_p_value": 0.007179928200717993,
           "monte_carlo_iterations": 100000,
-          "min_expected_frequency": 11.053609341825902,
-          "cramers_v": 0.0712066479828028,
+          "min_expected_frequency": 11.574591460200317,
+          "cramers_v": 0.07173266523788484,
           "categories": [
             {
               "category": "270-279",
-              "n": 595,
-              "candidate_n": 19,
-              "candidate_rate": 0.031932773109243695,
-              "candidate_standardized_residual": 2.390109819248563,
-              "odds_ratio_vs_rest": 2.6244574652777777,
+              "n": 563,
+              "candidate_n": 18,
+              "candidate_rate": 0.03197158081705151,
+              "candidate_standardized_residual": 1.8886344648221858,
+              "odds_ratio_vs_rest": 2.0650065530799475,
               "odds_ratio_ci95": [
-                1.3398827257060402,
-                5.140581974010301
+                1.0916530030715172,
+                3.9062339885156367
               ],
-              "fisher_p_vs_rest": 0.005352873013636281
+              "fisher_p_vs_rest": 0.032082679838642575
             },
             {
               "category": "280-285",
-              "n": 687,
-              "candidate_n": 11,
-              "candidate_rate": 0.01601164483260553,
-              "candidate_standardized_residual": -0.49341918960681175,
-              "odds_ratio_vs_rest": 0.7953032544378699,
+              "n": 664,
+              "candidate_n": 16,
+              "candidate_rate": 0.024096385542168676,
+              "candidate_standardized_residual": 0.6357628890187552,
+              "odds_ratio_vs_rest": 1.2989801395598497,
               "odds_ratio_ci95": [
-                0.38715305407269324,
-                1.6337395762883622
+                0.6814182785683757,
+                2.4762314954567404
               ],
-              "fisher_p_vs_rest": 0.5981973005831113
+              "fisher_p_vs_rest": 0.4976616676794853
             },
             {
               "category": "286-290",
-              "n": 602,
+              "n": 670,
               "candidate_n": 5,
-              "candidate_rate": 0.008305647840531562,
-              "candidate_standardized_residual": -1.8490693861761864,
-              "odds_ratio_vs_rest": 0.34952540480178673,
+              "candidate_rate": 0.007462686567164179,
+              "candidate_standardized_residual": -2.3641794018793747,
+              "odds_ratio_vs_rest": 0.26382131800088454,
               "odds_ratio_ci95": [
-                0.13493602514116967,
-                0.9053772591421826
+                0.10268973863338293,
+                0.6777862010167524
               ],
-              "fisher_p_vs_rest": 0.026744602428634523
+              "fisher_p_vs_rest": 0.0020795865492050127
             }
           ],
-          "holm_adjusted_p_value": 0.016854171150340817
+          "holm_adjusted_p_value": 0.015185246377312295
         },
         {
           "dimension": "class_group",
           "table": {
             "전사": {
-              "non_candidate": 365,
-              "candidate": 9
-            },
-            "마법사": {
-              "non_candidate": 374,
+              "non_candidate": 379,
               "candidate": 6
             },
-            "궁수": {
+            "마법사": {
               "non_candidate": 373,
               "candidate": 8
             },
+            "궁수": {
+              "non_candidate": 372,
+              "candidate": 10
+            },
             "도적": {
-              "non_candidate": 381,
+              "non_candidate": 382,
               "candidate": 6
             },
             "해적": {
-              "non_candidate": 356,
-              "candidate": 6
+              "non_candidate": 352,
+              "candidate": 9
             }
           },
-          "chi2": 1.1820645699390377,
+          "chi2": 1.9186191650733349,
           "dof": 4,
-          "p_value": 0.8810426497807258,
-          "monte_carlo_p_value": 0.8860011399886001,
+          "p_value": 0.7507238345367114,
+          "monte_carlo_p_value": 0.7535124648753513,
           "monte_carlo_iterations": 100000,
-          "min_expected_frequency": 6.725053078556264,
-          "cramers_v": 0.02504840928728346,
+          "min_expected_frequency": 7.4217185028993145,
+          "cramers_v": 0.03180246063452991,
           "categories": [
             {
               "category": "전사",
-              "n": 374,
-              "candidate_n": 9,
-              "candidate_rate": 0.02406417112299465,
-              "candidate_standardized_residual": 0.7784873809724522,
-              "odds_ratio_vs_rest": 1.4073761854583773,
+              "n": 385,
+              "candidate_n": 6,
+              "candidate_rate": 0.015584415584415584,
+              "candidate_standardized_residual": -0.6807208675685367,
+              "odds_ratio_vs_rest": 0.7095226673063084,
               "odds_ratio_ci95": [
-                0.6538373929217851,
-                3.0293582912782626
+                0.29513441743918845,
+                1.7057394382855635
               ],
-              "fisher_p_vs_rest": 0.39199384279406174
+              "fisher_p_vs_rest": 0.5487022652432999
             },
             {
               "category": "마법사",
-              "n": 380,
-              "candidate_n": 6,
-              "candidate_rate": 0.015789473684210527,
-              "candidate_standardized_residual": -0.39874409737990246,
-              "odds_ratio_vs_rest": 0.815969020837175,
-              "odds_ratio_ci95": [
-                0.3363085226399605,
-                1.9797459717628532
-              ],
-              "fisher_p_vs_rest": 0.8320050969463102
-            },
-            {
-              "category": "궁수",
               "n": 381,
               "candidate_n": 8,
               "candidate_rate": 0.02099737532808399,
-              "candidate_standardized_residual": 0.3465475710336836,
-              "odds_ratio_vs_rest": 1.1724754244861484,
+              "candidate_standardized_residual": 0.05970776370562426,
+              "odds_ratio_vs_rest": 1.027415030701375,
               "odds_ratio_ci95": [
-                0.5283522204084622,
-                2.6018602135545343
+                0.46839044230071913,
+                2.253636176105822
               ],
-              "fisher_p_vs_rest": 0.6725879979161502
+              "fisher_p_vs_rest": 1.0
+            },
+            {
+              "category": "궁수",
+              "n": 382,
+              "candidate_n": 10,
+              "candidate_rate": 0.02617801047120419,
+              "candidate_standardized_residual": 0.7659671049407375,
+              "odds_ratio_vs_rest": 1.3774564330737857,
+              "odds_ratio_ci95": [
+                0.6653400116580699,
+                2.8517542786701626
+              ],
+              "fisher_p_vs_rest": 0.4183590517594309
             },
             {
               "category": "도적",
-              "n": 387,
+              "n": 388,
               "candidate_n": 6,
-              "candidate_rate": 0.015503875968992248,
-              "candidate_standardized_residual": -0.44362080199145354,
-              "odds_ratio_vs_rest": 0.7971762150420852,
+              "candidate_rate": 0.015463917525773196,
+              "candidate_standardized_residual": -0.6999216639250256,
+              "odds_ratio_vs_rest": 0.7025226082817706,
               "odds_ratio_ci95": [
-                0.3285955888965843,
-                1.9339575432609553
+                0.2922350402952914,
+                1.6888392803557108
               ],
-              "fisher_p_vs_rest": 0.8325130211667193
+              "fisher_p_vs_rest": 0.5486319653007781
             },
             {
               "category": "해적",
-              "n": 362,
-              "candidate_n": 6,
-              "candidate_rate": 0.016574585635359115,
-              "candidate_standardized_residual": -0.2795901986616772,
-              "odds_ratio_vs_rest": 0.8676869430453312,
+              "n": 361,
+              "candidate_n": 9,
+              "candidate_rate": 0.024930747922437674,
+              "candidate_standardized_residual": 0.5793382806327001,
+              "odds_ratio_vs_rest": 1.2835227272727272,
               "odds_ratio_ci95": [
-                0.35752608987411516,
-                2.105806128432308
+                0.6039344420568944,
+                2.7278301694713103
               ],
-              "fisher_p_vs_rest": 1.0
+              "fisher_p_vs_rest": 0.5356449047406554
             }
           ],
-          "holm_adjusted_p_value": 0.8810426497807258
+          "holm_adjusted_p_value": 0.7507238345367114
         }
       ]
     }

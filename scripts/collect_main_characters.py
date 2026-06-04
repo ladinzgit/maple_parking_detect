@@ -74,10 +74,36 @@ MIN_PER_CLASS    = 10    # Phase 1 — 가용 직업당 최소 수집 목표
 MAX_PER_CLASS    = 100   # Phase 2 — 직업당 상한 (단일 직업 독점 방지)
 SAMPLE_DESIGN    = "balanced"
 REQUIRE_RECENT_ACCESS = False
-CHECKPOINT_MONTHS = ["2025-06", "2025-12", "2026-05"]
+
+# 접속 통제변인 (재설계 2026-06): 관측 12개월(2025-06~2026-05) 중 10개월 이상 접속 요구.
+#   → 표본 전체를 '활발히 접속' 상태로 균일화 → 접속이 클러스터 교란/축이 되지 못하게 통제.
+#   month_has_access 정의(월별 [1,8,15,22]일 중 1회+ 접속=활성월)는 collect_features
+#   access_active_months 와 동일 → 표본 전원 access_active_months >= 10 보장.
+END_YEAR_MONTH   = "2026-05"   # 관측 마지막 월 (collect_features END_YEAR_MONTH 와 일치)
+SNAPSHOT_MONTHS  = 12
+
+
+def _gen_months(end_ym, n):
+    """end_ym 에서 n개월 거슬러 올라간 'YYYY-MM' 리스트 (오래된→최신)."""
+    ey, em = map(int, end_ym.split("-"))
+    out, y, m = [], ey, em
+    for _ in range(n):
+        out.append(f"{y:04d}-{m:02d}")
+        m -= 1
+        if m < 1:
+            m, y = 12, y - 1
+    out.reverse()
+    return out
+
+
+CHECKPOINT_MONTHS = _gen_months(END_YEAR_MONTH, SNAPSHOT_MONTHS)   # 2025-06 ~ 2026-05
 CHECKPOINT_DAYS = [1, 8, 15, 22]
-MIN_CHECKPOINT_MONTHS = len(CHECKPOINT_MONTHS)
+DEFAULT_MIN_CHECKPOINT_MONTHS = 10   # ≥10/12 접속 (사용자 확정 — 정밀도 우선 trade-off)
+MIN_CHECKPOINT_MONTHS = DEFAULT_MIN_CHECKPOINT_MONTHS
 REQUIRE_CHECKPOINT_ACCESS = True
+# 스냅샷 레벨 in-range 가드: features 최신 스냅샷 기준일(END_YEAR_MONTH-01)에서도 270~290 인지
+#   확인 → 랭킹(TARGET_DATE) 레벨과 스냅샷 레벨 불일치로 인한 <270 누수(20명) 차단.
+SNAPSHOT_END_DATE = f"{END_YEAR_MONTH}-01"
 # ─────────────────────────────────────────────────────────────────────────────
 
 CLASS_GROUP_MAP = {
@@ -364,11 +390,22 @@ def month_has_access(ocid, year_month):
 
 
 def passes_checkpoint_access(ocid):
-    """큰 이벤트/현재 실험 checkpoint 월 접속 기준을 통과하는지 확인."""
+    """관측 월 중 MIN_CHECKPOINT_MONTHS 개월 이상 접속하는지 — 조기 종료로 호출 절감.
+    누적 active 가 임계 도달 → 즉시 통과; 남은 달을 다 더해도 임계 불가 → 즉시 탈락.
+    (12개월×4일=48콜 최악을 활성 ~10콜 / 비활성 ~12~20콜로 절감)"""
     if not REQUIRE_CHECKPOINT_ACCESS:
         return True
-    active_months = sum(1 for ym in CHECKPOINT_MONTHS if month_has_access(ocid, ym))
-    return active_months >= MIN_CHECKPOINT_MONTHS
+    n = len(CHECKPOINT_MONTHS)
+    active = 0
+    for i, ym in enumerate(CHECKPOINT_MONTHS):
+        if month_has_access(ocid, ym):
+            active += 1
+            if active >= MIN_CHECKPOINT_MONTHS:
+                return True
+        remaining = n - (i + 1)
+        if active + remaining < MIN_CHECKPOINT_MONTHS:
+            return False
+    return active >= MIN_CHECKPOINT_MONTHS
 
 
 def process_candidate(entry, class_name, seen_ocids, lock):
@@ -411,9 +448,14 @@ def process_candidate(entry, class_name, seen_ocids, lock):
         return None
     if REQUIRE_RECENT_ACCESS and basic.get("access_flag") != "true":
         return None
-    if not passes_checkpoint_access(ocid):
+    # 스냅샷 레벨 in-range 가드 (접속 probe 前 — 싼 1콜로 비싼 probe 낭비 방지):
+    #   features 최신 스냅샷일(SNAPSHOT_END_DATE) 기준 270~290 인지 확인.
+    #   랭킹 레벨(TARGET_DATE)은 스냅샷일에 아직 <270 일 수 있어 <270 누수 발생 → 차단.
+    snap_basic = api_get("character/basic", {"ocid": ocid, "date": SNAPSHOT_END_DATE})
+    snap_level = int(snap_basic.get("character_level") or 0) if snap_basic else 0
+    if snap_level < LEVEL_MIN or snap_level > LEVEL_MAX:
         return None
-
+    # 본캐 판별(union-raider, 1콜)을 비싼 접속 probe 前에 수행 → 부캐는 probe 비용 안 냄.
     raider = api_get("user/union-raider", {"ocid": ocid, "date": TARGET_DATE})
     if not raider:
         return None
@@ -424,10 +466,14 @@ def process_candidate(entry, class_name, seen_ocids, lock):
     if max_block_lv > char_level:
         return None    # 더 높은 레벨 캐릭터 존재 → 부캐
 
+    # 접속 통제(≥10/12) 필터는 가장 비싼 단계 → 본캐 확정 후 마지막에 (조기종료 적용)
+    if not passes_checkpoint_access(ocid):
+        return None
+
     return {
         "character_name":       char_name,
         "ocid":                 ocid,
-        "level":                char_level,
+        "level":                snap_level,   # 스냅샷일 기준 레벨 (features 와 일치, in-range 보장)
         "character_class":      class_name,
         "world_name":           world_name,
         "union_level":          union_lv,
@@ -504,10 +550,19 @@ def collect_group(group_name, seen_ocids, lock):
         page = job_pages[cls][cursor[cls]]
         cursor[cls] += 1
         candidates = fetch_ranking_page(cls, page)
-        to_process = [
-            e for e in candidates
-            if LEVEL_MIN <= int(e.get("character_level") or 0) <= LEVEL_MAX
-        ]
+
+        # 빈 캡 사전 필터: 랭킹 레벨 기준 이미 채워진 빈의 후보는 비싼 process_candidate
+        #   (접속 probe ~15콜) 호출 前에 스킵. 두 빈이 채워진 뒤 남은 빈만 탐색 → 꼬리 churn
+        #   비용을 페이지당 ~1콜(fetch)로 축소. (process_page는 단일 코디네이터 스레드에서만
+        #   호출되어 bin_counts 읽기 무경쟁.) 경계 누수(랭킹↔스냅샷 레벨)는 무시 가능.
+        def _bin_open(entry):
+            lv = int(entry.get("character_level") or 0)
+            if lv < LEVEL_MIN or lv > LEVEL_MAX:
+                return False
+            bi = level_bin_idx(lv)
+            return bi >= 0 and bin_counts[bi] < BIN_TARGETS[bi]
+
+        to_process = [e for e in candidates if _bin_open(e)]
         if not to_process:
             return True
         with ThreadPoolExecutor(max_workers=CONCURRENCY) as executor:
@@ -626,7 +681,18 @@ def collect():
     print("\n[검증]")
     print(f"  행 수: {len(df)} (목표 {total_target})")
     print(f"  OCID 중복: {df['ocid'].duplicated().sum()}")
-    print(f"  레벨 범위 위반: {((df['level'] < LEVEL_MIN) | (df['level'] > LEVEL_MAX)).sum()}")
+    out_of_range = ((df['level'] < LEVEL_MIN) | (df['level'] > LEVEL_MAX)).sum()
+    print(f"  레벨 범위 위반: {out_of_range}")
+    if out_of_range:
+        print(f"  ⚠ 스냅샷 레벨 in-range 가드에도 {out_of_range}명 범위 밖 — 원인 점검 필요")
+    if len(df) < total_target:
+        deficit = total_target - len(df)
+        print(f"  ⚠ 목표 미달 {deficit}명 — ≥10/12 접속 필터로 후보 탈락률↑. "
+              f"계열별 페이지 풀 소진 여부 확인 후 재실행 권장")
+        gshort = {g: int((df['class_group'] == g).sum()) for g in GROUPS}
+        for g, n in gshort.items():
+            if n < TARGET_PER_GROUP:
+                print(f"     [{g}] {n}/{TARGET_PER_GROUP} (부족 {TARGET_PER_GROUP - n})")
 
     print("\n계열별 분포:")
     print(df["class_group"].value_counts().to_string())
@@ -674,7 +740,7 @@ def configure_from_args(args):
     REQUIRE_RECENT_ACCESS = args.require_recent_access
     CHECKPOINT_MONTHS = args.checkpoint_months
     MIN_CHECKPOINT_MONTHS = (
-        len(CHECKPOINT_MONTHS)
+        DEFAULT_MIN_CHECKPOINT_MONTHS
         if args.min_checkpoint_months is None
         else args.min_checkpoint_months
     )
